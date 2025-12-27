@@ -5,23 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Content Hub - Modern Dashboard</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="logo">
-                <i class="fas fa-cube"></i>
-                <span>Content Hub</span>
-            </div>
-            <button class="sidebar-toggle" id="sidebarToggle">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
+    <!-- Floating Orbs for Ambient Animation -->
+    <div class="floating-orb floating-orb-1"></div>
+    <div class="floating-orb floating-orb-2"></div>
+    <div class="floating-orb floating-orb-3"></div>
+
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav" id="topNav">
+        <a href="#" class="logo">
+            <i class="fas fa-cube"></i>
+            <span>Content Hub</span>
+        </a>
         
-        <nav class="sidebar-nav">
+        <div class="nav-links" id="navLinks">
             <a href="#" class="nav-item active" data-section="dashboard">
                 <i class="fas fa-chart-line"></i>
                 <span>Dashboard</span>
@@ -42,67 +42,60 @@
                 <i class="fas fa-envelope"></i>
                 <span>Contact</span>
             </a>
-        </nav>
+        </div>
         
-        <div class="connection-status">
-            <div class="status-indicator">
+        <div class="nav-actions">
+            <div class="connection-badge">
                 <div class="status-dot" id="statusDot"></div>
                 <span id="statusText">Connecting...</span>
             </div>
+            <button id="themeToggle" class="theme-btn">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
         </div>
-    </aside>
-
-    <!-- Mobile Menu Button -->
-    <button class="mobile-menu-btn" id="mobileMenuBtn">
-        <i class="fas fa-bars"></i>
-    </button>
+    </nav>
 
     <!-- Main Content -->
     <main class="main-content">
-        <!-- Header with Stats -->
-        <header class="header">
-            <div class="header-content">
-                <h1 class="page-title">
-                    <i class="fas fa-chart-line"></i>
-                    Dashboard
-                </h1>
-                <div class="theme-toggle">
-                    <button id="themeToggle" class="theme-btn">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="stats-grid" id="statsGrid">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-file-alt"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 id="totalCount">0</h3>
-                        <p>Total Content</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon published">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 id="publishedCount">0</h3>
-                        <p>Published</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon draft">
-                        <i class="fas fa-edit"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 id="draftCount">0</h3>
-                        <p>Drafts</p>
-                    </div>
-                </div>
-            </div>
+        <!-- Page Header -->
+        <header class="page-header">
+            <h1 class="page-title" id="pageTitle">Dashboard</h1>
+            <p class="page-subtitle" id="pageSubtitle">Welcome back! Here's an overview of your content.</p>
         </header>
+        
+        <!-- Stats Grid -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="totalCount">0</h3>
+                    <p>Total Content</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon published">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="publishedCount">0</h3>
+                    <p>Published</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon draft">
+                    <i class="fas fa-edit"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="draftCount">0</h3>
+                    <p>Drafts</p>
+                </div>
+            </div>
+        </div>
 
         <!-- Content Area -->
         <div class="content-wrapper">
@@ -141,9 +134,6 @@
             </div>
         </div>
     </main>
-
-    <!-- Overlay for mobile -->
-    <div class="overlay" id="overlay"></div>
 
     <script src="script.js"></script>
 </body>

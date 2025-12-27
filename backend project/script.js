@@ -6,18 +6,28 @@ const loadingEl = document.getElementById('loading');
 const contentGridEl = document.getElementById('contentGrid');
 const emptyEl = document.getElementById('empty');
 const dashboardViewEl = document.getElementById('dashboardView');
-const sidebar = document.getElementById('sidebar');
-const overlay = document.getElementById('overlay');
+const topNav = document.getElementById('topNav');
+const navLinks = document.getElementById('navLinks');
 const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-const sidebarToggle = document.getElementById('sidebarToggle');
 const themeToggle = document.getElementById('themeToggle');
 const statusDot = document.getElementById('statusDot');
 const statusText = document.getElementById('statusText');
+const pageTitle = document.getElementById('pageTitle');
+const pageSubtitle = document.getElementById('pageSubtitle');
 
 // State
 let allContent = [];
 let currentView = 'dashboard';
 let currentTheme = localStorage.getItem('theme') || 'dark';
+
+// Page titles and subtitles
+const pageInfo = {
+    dashboard: { title: 'Dashboard', subtitle: 'Welcome back! Here\'s an overview of your content.' },
+    all: { title: 'All Content', subtitle: 'Browse and manage all your published content.' },
+    home: { title: 'Home', subtitle: 'Content for your home section.' },
+    about: { title: 'About', subtitle: 'About section content and information.' },
+    contact: { title: 'Contact', subtitle: 'Contact information and forms.' }
+};
 
 // Initialize
 document.addEventListener('DOMContentLoaded', init);
@@ -26,9 +36,36 @@ async function init() {
     setupTheme();
     setupNavigation();
     setupMobileMenu();
+    setupScrollEffects();
     await loadContent();
     updateStats();
     showDashboard();
+    animateStatsOnLoad();
+}
+
+// Scroll Effects
+function setupScrollEffects() {
+    let lastScroll = 0;
+    
+    window.addEventListener('scroll', () => {
+        const currentScroll = window.scrollY;
+        
+        if (currentScroll > 50) {
+            topNav.classList.add('scrolled');
+        } else {
+            topNav.classList.remove('scrolled');
+        }
+        
+        lastScroll = currentScroll;
+    });
+}
+
+// Animate stats on load
+function animateStatsOnLoad() {
+    const statCards = document.querySelectorAll('.stat-card');
+    statCards.forEach((card, index) => {
+        card.style.animationDelay = `${0.1 + index * 0.1}s`;
+    });
 }
 
 // Theme Management
@@ -44,6 +81,12 @@ function toggleTheme() {
     document.documentElement.setAttribute('data-theme', currentTheme);
     localStorage.setItem('theme', currentTheme);
     updateThemeIcon();
+    
+    // Add rotation animation
+    themeToggle.style.transform = 'scale(1.1) rotate(360deg)';
+    setTimeout(() => {
+        themeToggle.style.transform = '';
+    }, 300);
 }
 
 function updateThemeIcon() {
@@ -60,15 +103,14 @@ function setupNavigation() {
             e.preventDefault();
             const section = item.dataset.section;
             
-            // Update active nav item
-            navItems.forEach(nav => nav.classList.remove('active'));
+            // Update active nav item with animation
+            navItems.forEach(nav => {
+                nav.classList.remove('active');
+            });
             item.classList.add('active');
             
-            // Update page title
-            const pageTitle = document.querySelector('.page-title');
-            const icon = item.querySelector('i').className;
-            const text = item.querySelector('span').textContent;
-            pageTitle.innerHTML = `<i class="${icon}"></i> ${text}`;
+            // Update page title and subtitle with animation
+            updatePageHeader(section);
             
             // Show appropriate view
             if (section === 'dashboard') {
@@ -85,22 +127,51 @@ function setupNavigation() {
     });
 }
 
-function setupMobileMenu() {
-    mobileMenuBtn.addEventListener('click', openMobileMenu);
-    sidebarToggle.addEventListener('click', closeMobileMenu);
-    overlay.addEventListener('click', closeMobileMenu);
+function updatePageHeader(section) {
+    const info = pageInfo[section] || pageInfo.dashboard;
+    
+    // Animate out
+    pageTitle.style.opacity = '0';
+    pageTitle.style.transform = 'translateY(-10px)';
+    pageSubtitle.style.opacity = '0';
+    
+    setTimeout(() => {
+        pageTitle.textContent = info.title;
+        pageSubtitle.textContent = info.subtitle;
+        
+        // Animate in
+        pageTitle.style.opacity = '1';
+        pageTitle.style.transform = 'translateY(0)';
+        pageSubtitle.style.opacity = '1';
+    }, 200);
+    
+    // Add transition styles
+    pageTitle.style.transition = 'all 0.3s ease';
+    pageSubtitle.style.transition = 'all 0.3s ease 0.1s';
 }
 
-function openMobileMenu() {
-    sidebar.classList.add('open');
-    overlay.classList.add('show');
-    document.body.style.overflow = 'hidden';
+function setupMobileMenu() {
+    mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+}
+
+function toggleMobileMenu() {
+    navLinks.classList.toggle('open');
+    const icon = mobileMenuBtn.querySelector('i');
+    
+    if (navLinks.classList.contains('open')) {
+        icon.className = 'fas fa-times';
+        mobileMenuBtn.style.transform = 'rotate(90deg)';
+    } else {
+        icon.className = 'fas fa-bars';
+        mobileMenuBtn.style.transform = 'rotate(0deg)';
+    }
 }
 
 function closeMobileMenu() {
-    sidebar.classList.remove('open');
-    overlay.classList.remove('show');
-    document.body.style.overflow = '';
+    navLinks.classList.remove('open');
+    const icon = mobileMenuBtn.querySelector('i');
+    icon.className = 'fas fa-bars';
+    mobileMenuBtn.style.transform = 'rotate(0deg)';
 }
 
 // Data Loading
@@ -143,26 +214,66 @@ function updateConnectionStatus(status) {
             statusText.textContent = 'Connected';
             break;
         case 'error':
-            statusText.textContent = 'Connection Error';
+            statusText.textContent = 'Error';
             break;
     }
 }
 
-// Stats
+// Stats with Animation
 function updateStats() {
     const total = allContent.length;
     const published = allContent.filter(item => item.status === 'published').length;
     const draft = allContent.filter(item => item.status === 'draft').length;
     
-    document.getElementById('totalCount').textContent = total;
-    document.getElementById('publishedCount').textContent = published;
-    document.getElementById('draftCount').textContent = draft;
+    animateCounter('totalCount', total);
+    animateCounter('publishedCount', published);
+    animateCounter('draftCount', draft);
+}
+
+function animateCounter(elementId, targetValue) {
+    const element = document.getElementById(elementId);
+    const duration = 1000;
+    const startTime = performance.now();
+    const startValue = 0;
+    
+    function updateCounter(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Easing function for smooth animation
+        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+        const currentValue = Math.floor(startValue + (targetValue - startValue) * easeOutQuart);
+        
+        element.textContent = currentValue;
+        
+        if (progress < 1) {
+            requestAnimationFrame(updateCounter);
+        } else {
+            element.textContent = targetValue;
+        }
+    }
+    
+    requestAnimationFrame(updateCounter);
 }
 
 // Dashboard View
 function showDashboard() {
     hideAllViews();
     dashboardViewEl.style.display = 'block';
+    
+    // Animate dashboard cards
+    const cards = dashboardViewEl.querySelectorAll('.dashboard-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 100 + index * 100);
+    });
+    
     populateRecentActivity();
 }
 
@@ -178,8 +289,8 @@ function populateRecentActivity() {
         return;
     }
     
-    recentActivity.innerHTML = recentItems.map(item => `
-        <div class="activity-item">
+    recentActivity.innerHTML = recentItems.map((item, index) => `
+        <div class="activity-item" style="animation: fadeInUp 0.4s ease ${index * 0.1}s backwards;">
             <div class="activity-icon">
                 <i class="fas ${item.status === 'published' ? 'fa-check' : 'fa-edit'}"></i>
             </div>
@@ -237,24 +348,16 @@ function displayContent(contentItems) {
     
     contentItems.forEach((content, index) => {
         setTimeout(() => {
-            const card = createContentCard(content);
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(20px)';
+            const card = createContentCard(content, index);
             contentGridEl.appendChild(card);
-            
-            requestAnimationFrame(() => {
-                card.style.transition = 'all 0.5s ease';
-                card.style.opacity = '1';
-                card.style.transform = 'translateY(0)';
-            });
-        }, index * 100);
+        }, index * 80);
     });
 }
 
-function createContentCard(content) {
+function createContentCard(content, index) {
     const card = document.createElement('div');
     card.className = 'content-card';
-    card.style.animationDelay = `${Math.random() * 0.3}s`;
+    card.style.animationDelay = `${index * 0.08}s`;
 
     const hasImage = content.image_url && content.image_url.trim() !== '';
     
@@ -263,7 +366,7 @@ function createContentCard(content) {
              <img src="${content.image_url}" alt="${content.title || 'Content image'}" class="content-image" 
                   onerror="this.parentElement.remove();" 
                   onload="this.style.opacity='1';" 
-                  style="opacity: 0; transition: opacity 0.3s ease;">
+                  style="opacity: 0; transition: opacity 0.5s ease;">
            </div>`
         : '';
 
@@ -274,6 +377,15 @@ function createContentCard(content) {
             <p class="content-description">${content.description || 'No description available.'}</p>
         </div>
     `;
+
+    // Add hover sound effect (optional visual feedback)
+    card.addEventListener('mouseenter', () => {
+        card.style.zIndex = '10';
+    });
+    
+    card.addEventListener('mouseleave', () => {
+        card.style.zIndex = '';
+    });
 
     return card;
 }
@@ -294,3 +406,30 @@ function showError() {
         <p>Unable to load content. Please check your connection and try again.</p>
     `;
 }
+
+// Intersection Observer for scroll animations
+function setupScrollAnimations() {
+    const observerOptions = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.1
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-in');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+    
+    document.querySelectorAll('.content-card, .stat-card, .dashboard-card').forEach(el => {
+        observer.observe(el);
+    });
+}
+
+// Initialize scroll animations after content loads
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(setupScrollAnimations, 500);
+});
